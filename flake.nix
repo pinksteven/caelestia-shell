@@ -114,6 +114,18 @@
                 --prefix PATH : ${pkgs.lib.makeBinPath deps} \
                 --prefix FONTCONFIG_PATH : ${pkgs.fontconfig.out}/etc/fonts \
                 --add-flags "-p $out/share/quickshell/caelestia"
+
+
+                cat > $out/bin/caelestia-restart << 'EOF'
+                #!/usr/bin/env bash
+                if kill $(pgrep -f caelestia | grep -v ^$$\$); then
+                  echo "Restarting caelestia shell..."
+                  exec caelestia shell -d
+                else
+                  echo "Caelestia shell not running"
+                fi
+                EOF
+                chmod +x $out/bin/caelestia-restart
               '';
             };
           default = pkgs.buildEnv {
