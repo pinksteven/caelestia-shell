@@ -102,24 +102,30 @@
               '';
 
               patchPhase = ''
-                substituteInPlace shell.qml \
-                  --replace-fail "//@ pragma Env QS_NO_RELOAD_POPUP=1" "
-                  //@ pragma Env QS_NO_RELOAD_POPUP=1
-                  //@ pragma UseQApplication
-                  "
-
                 substituteInPlace run.fish \
                   --replace-fail "(dirname (status filename))" "$out/share/quickshell/caelestia"
               '';
 
               postFixup = ''
-                makeWrapper ${qs}/bin/qs $out/bin/qs \
+                makeWrapper ${qs}/bin/qs $out/bin/caelestia-shell \
                 --unset QT_STYLE_OVERRIDE \
                 --set QT_QUICK_CONTROLS_STYLE Basic \
                 --set CAELESTIA_BD_PATH "$out/bin/beat_detector" \
-                --prefix XDG_CONFIG_DIRS : $out/share \
                 --prefix PATH : ${pkgs.lib.makeBinPath deps} \
-                --prefix FONTCONFIG_PATH : ${pkgs.fontconfig.out}/etc/fonts
+                --prefix FONTCONFIG_PATH : ${pkgs.fontconfig.out}/etc/fonts \
+                --add-flags "-p $out/share/quickshell/caelestia"
+
+
+                cat > $out/bin/caelestia-restart << 'EOF'
+                #!/usr/bin/env bash
+                if kill $(pgrep -f caelestia | grep -v ^$$\$); then
+                  echo "Restarting caelestia shell..."
+                  exec caelestia shell -d
+                else
+                  echo "Caelestia shell not running"
+                fi
+                EOF
+                chmod +x $out/bin/caelestia-restart
               '';
             };
           default = pkgs.buildEnv {
