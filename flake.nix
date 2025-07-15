@@ -32,6 +32,7 @@
       );
   in {
     formatter = forAllSystems (pkgs: pkgs.alejandra);
+    withCli = false;
 
     packages = forAllSystems (pkgs: rec {
       caelestia-shell = pkgs.callPackage ./default.nix {
@@ -42,13 +43,12 @@
         };
         app2unit = inputs.app2unit.packages.${pkgs.system}.default;
       };
-        default = pkgs.buildEnv {
-          name = "caelestia-shell";
-          paths = [
-            self.packages.${pkgs.system}.caelestia-shell
-            inputs.caelestia-cli.packages.${pkgs.system}.default
-          ];
-        };
+      default = pkgs.buildEnv {
+        name = "caelestia-shell";
+        paths = [
+          self.packages.${pkgs.system}.caelestia-shell 
+        ] ++ pkgs.lib.optional self.withCli inputs.caelestia-cli.packages.${pkgs.system}.default;
+      };
     });
   };
 }
