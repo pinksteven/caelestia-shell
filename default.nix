@@ -19,29 +19,38 @@
   bluez,
   bash,
   hyprland,
+  coreutils,
+  findutils,
   material-symbols,
   gcc,
   quickshell,
   aubio,
   pipewire,
+  caelestia-cli,
+  withCli ? false,
 }: let
-  runtimeDeps = [
-    fish
-    ddcutil
-    brightnessctl
-    app2unit
-    cava
-    networkmanager
-    lm_sensors
-    grim
-    swappy
-    wl-clipboard
-    libqalculate
-    inotify-tools
-    bluez
-    bash
-    hyprland
-  ];
+  runtimeDeps =
+    [
+      fish
+      ddcutil
+      brightnessctl
+      app2unit
+      cava
+      networkmanager
+      lm_sensors
+      grim
+      swappy
+      wl-clipboard
+      libqalculate
+      inotify-tools
+      bluez
+      bash
+      hyprland
+      coreutils
+      findutils
+    ]
+    ++ lib.optional withCli caelestia-cli;
+
   fontconfig = makeFontsConf {
     fontDirectories = [material-symbols];
   };
@@ -53,7 +62,7 @@ in
 
     nativeBuildInputs = [gcc makeWrapper];
     buildInputs = [quickshell aubio pipewire];
-    propogatedBuildInputs = runtimeDeps;
+    propagatedBuildInputs = runtimeDeps;
 
     buildPhase = ''
       mkdir -p bin
